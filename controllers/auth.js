@@ -1,0 +1,144 @@
+const User = require("../models/user");
+const Note = require("../models/Note");
+const Task = require("../models/tasks");
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
+
+// SIGNUP
+exports.signup = async (req, res) => {
+  try {
+    const { name, email, password } = req.body;
+
+    // Check if user exists
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(400).json({ message: "User already exists" });
+    }
+
+    // Hash password
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const user = await User.create({
+      name,
+      email,
+      password: hashedPassword
+    });
+
+    res.status(201).json({ message: "User registered successfully" });
+
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Server Error" });
+  }
+};
+
+
+// LOGIN
+exports.login = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(400).json({ message: "Invalid credentials" });
+    }
+
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      return res.status(400).json({ message: "Invalid credentials" });
+    }
+    const token = jwt.sign(
+      { id: user._id },
+      process.env.JWT_SECRET,
+      { expiresIn: "1d" }
+    );
+
+    res.json({ token });
+
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Server Error" });
+  }
+};
+// change password
+
+exports.changePass = async (req, res) => {
+  try {
+    const { email, oldPassword, newPassword } = req.body;
+
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(400).json({ message: "User not found" });
+    }
+
+    const isMatch = await bcrypt.compare(oldPassword, user.password);
+    if (!isMatch) {
+      return res.status(400).json({ message: "Old password is incorrect" });
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    user.password = hashedPassword;
+    await user.save();
+
+    res.json({ message: "Password changed successfully" });
+
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Server Error" });
+  }
+};
+
+exports.deleteAcc = async (req, res) => {
+  try {
+    const { password } = req.body;
+
+    // User ID comes from token
+    const user = await User.findById(req.user.id);
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    const isMatch = await bcrypt.compare(password, user.password);
+
+    if (!isMatch) {
+      return res.status(400).json({ message: "Incorrect password" });
+    }
+
+    // Delete user
+    await User.findByIdAndDelete(req.user.id);
+
+    // Optional: delete user's tasks/notes
+    await Task.deleteMany({ user: req.user.id });
+    await Note.deleteMany({ user: req.user.id });
+
+    res.json({ message: "Account deleted successfully" });
+
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Server Error" });
+  }
+};
+exports.deleteAllNotes = async (req, res) => {
+  try {
+    await Note.deleteMany({ user: req.user.id });
+
+    res.json({ message: "All your notes deleted" });
+
+  } catch (error) {
+    res.status(500).json({ message: "Server Error" });
+  }
+};
+
+exports.deleteAllTasks = async (req, res) => {
+  try {
+    await Task.deleteMany({ user: req.user.id });
+
+    res.json({ message: "All your tasks deleted" });
+
+  } catch (error) {
+    res.status(500).json({ message: "Server Error" });
+  }
+};
+
+
