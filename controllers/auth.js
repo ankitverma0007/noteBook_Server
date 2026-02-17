@@ -102,7 +102,14 @@ exports.deleteAcc = async (req, res) => {
   try {
     const { password } = req.body;
 
-    // User ID comes from token
+    if (!password) {
+      return res.status(400).json({ message: "Password is required" });
+    }
+
+    if (!req.user || !req.user.id) {
+      return res.status(401).json({ message: "Invalid token" });
+    }
+
     const user = await User.findById(req.user.id);
 
     if (!user) {
@@ -115,20 +122,19 @@ exports.deleteAcc = async (req, res) => {
       return res.status(400).json({ message: "Incorrect password" });
     }
 
-    // Delete user
-    await User.findByIdAndDelete(req.user.id);
-
-    // Optional: delete user's tasks/notes
-    await Task.deleteMany({ user: req.user.id });
     await Note.deleteMany({ user: req.user.id });
+    await Task.deleteMany({ user: req.user.id });
+    await User.findByIdAndDelete(req.user.id);
 
     res.json({ message: "Account deleted successfully" });
 
   } catch (error) {
-    console.log(error);
+    console.log("DELETE ACCOUNT ERROR:", error);
     res.status(500).json({ message: "Server Error" });
   }
 };
+
+
 exports.deleteAllNotes = async (req, res) => {
   try {
     await Note.deleteMany({ user: req.user.id });
