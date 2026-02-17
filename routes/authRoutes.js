@@ -13,7 +13,7 @@ const authMiddleWare = require("../middleWare/authMiddleWare");
 
 router.post("/signup", signup);
 router.post("/login", login);
-router.post("/changePass", changePass);
+router.post("/changePass", authMiddleWare, changePass);
 router.post("/deleteAcc", authMiddleWare, deleteAcc);
 router.post("/deleteAllNotes",authMiddleWare, deleteAllNotes);
 router.post("/deleteAllTasks",authMiddleWare, deleteAllTasks)

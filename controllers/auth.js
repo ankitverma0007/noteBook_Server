@@ -69,7 +69,7 @@ exports.login = async (req, res) => {
 
 exports.changePass = async (req, res) => {
   try {
-    const { currentPassword, newPassword } = req.body;
+    const { currentPassword, newPassword } = req.body
 
     // Get user from token (not email)
     const user = await User.findById(req.user.id);
