@@ -1,6 +1,5 @@
 const User = require("../models/user");
 const Note = require("../models/Note");
-const Task = require("../models/tasks");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
@@ -123,7 +122,6 @@ exports.deleteAcc = async (req, res) => {
     }
 
     await Note.deleteMany({ user: req.user.id });
-    await Task.deleteMany({ user: req.user.id });
     await User.findByIdAndDelete(req.user.id);
 
     res.json({ message: "Account deleted successfully" });
@@ -140,17 +138,6 @@ exports.deleteAllNotes = async (req, res) => {
     await Note.deleteMany({ user: req.user.id });
 
     res.json({ message: "All your notes deleted" });
-
-  } catch (error) {
-    res.status(500).json({ message: "Server Error" });
-  }
-};
-
-exports.deleteAllTasks = async (req, res) => {
-  try {
-    await Task.deleteMany({ user: req.user.id });
-
-    res.json({ message: "All your tasks deleted" });
 
   } catch (error) {
     res.status(500).json({ message: "Server Error" });

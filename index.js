@@ -4,8 +4,6 @@ const cors = require("cors");
 const  mongoose = require("mongoose");
 const routes = require("./routes/routes");
 const authRoutes = require("./routes/authRoutes");
-const task = require("./routes/taskRouts");
-
 
 const app = express();
 app.use(cors());
@@ -17,8 +15,6 @@ mongoose.connect(process.env.MONGO_URI)
 
 app.use("/note", routes);
 app.use("/auth", authRoutes);
-app.use("/tasks", task)
-
 
 const PORT = process.env.PORT || 5000;
 
