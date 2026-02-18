@@ -11,7 +11,7 @@ const app = express();
 app.use(cors({
   origin: [
     "http://localhost:5173",
-    "https://notebook-ankit-vermas-projects-1cf46caa.vercel.app/"
+    "https://notebook-ankit-vermas-projects-1cf46caa.vercel.app"
   ],
   methods: ["GET", "POST", "PUT", "DELETE"],
   credentials: true
