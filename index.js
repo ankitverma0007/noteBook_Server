@@ -13,6 +13,7 @@ app.use(cors({
     "http://localhost:5173",
     "https://notebook-seven-zeta.vercel.app/"
   ],
+  methods: ["GET", "POST", "PUT", "DELETE"],
   credentials: true
 }));
 
